@@ -61,13 +61,13 @@ async function evaluateTab(tabId: number, url: string): Promise<void> {
   }
 }
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabId: number, changeInfo: { status: string; }, tab: { url: string; }) => {
   if (changeInfo.status === "loading" && tab?.url) {
     await evaluateTab(tabId, tab.url);
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId) => {
+chrome.tabs.onRemoved.addListener(async (tabId: number) => {
   await removeTabRisk(tabId);
 });
 
@@ -78,9 +78,9 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message: { type: string; settings: any; }, _sender: any, sendResponse: (arg0: { ok: boolean; error?: string; risk?: TabRiskPayload; tabUrl?: any; settings?: any; }) => void) => {
   if (message?.type === "SAFEGUARD_GET_TAB_RISK") {
-    chrome.tabs.query({ active: true, currentWindow: true }).then(async (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }).then(async (tabs: any[]) => {
       const activeTab = tabs[0];
       if (!activeTab?.id) {
         sendResponse({ ok: false, error: "No active tab" });
